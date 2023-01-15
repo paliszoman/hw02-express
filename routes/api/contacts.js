@@ -28,12 +28,11 @@ router.get("/:contactId", async (req, res, next) => {
 
 router.post("/", async (req, res, next) => {
   const { name, email, phone } = req.body;
-  console.log(req.body);
   if (!name || !email || !phone) {
     return res.status(400).json({ message: "missing required name field" });
   }
-  await addContact(req.body);
-  res.status(201);
+  await addContact(name, email, phone);
+  res.status(201).json({ message: "contact added" });
 });
 
 router.delete("/:contactId", async (req, res, next) => {
@@ -49,7 +48,14 @@ router.delete("/:contactId", async (req, res, next) => {
 });
 
 router.put("/:contactId", async (req, res, next) => {
-  res.json({ message: "template message" });
+  const { contactId } = req.params;
+  const { name, email, phone } = req.body;
+  if (!name && !email && !phone) {
+    return res.status(400).json({ message: "missing fields" });
+  }
+  const savedContact = await updateContact(contactId, req.body);
+  if (savedContact) res.status(200).json({ updated: savedContact });
+  if (!savedContact) res.status(404).json({ message: "Not found" });
 });
 
 module.exports = router;

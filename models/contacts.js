@@ -43,18 +43,34 @@ const removeContact = async (contactId) => {
   }
 };
 
-const addContact = async (body) => {
+const addContact = async (name, email, phone) => {
   try {
     const contacts = await listContacts();
-    const contact = { id: Date.now().toString(), ...body };
-    const newContacts = contacts.splice(contacts.length, contact);
-    console.log(contact);
+    const contact = { id: Date.now().toString(), name, email, phone };
+    contacts.push(contact);
+    await saveContacts(contacts);
   } catch (err) {
     console.log(err);
   }
 };
 
-const updateContact = async (contactId, body) => {};
+const updateContact = async (contactId, body) => {
+  try {
+    const contacts = await listContacts();
+    const updatedContactIndex = await contacts.findIndex(
+      (contact) => contact.id === contactId
+    );
+    const updatingContact = contacts[updatedContactIndex];
+    if (body.name) updatingContact.name = body.name;
+    if (body.email) updatingContact.email = body.email;
+    if (body.phone) updatingContact.phone = body.phone;
+
+    await saveContacts(contacts);
+    return updatingContact;
+  } catch (err) {
+    console.log(err);
+  }
+};
 
 module.exports = {
   listContacts,
